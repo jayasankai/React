@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import LogoutButton from '../Logout/LogoutButton.jsx';
 import '../Logout/LogoutButton.css';
+import './TodoPage.css';
 
 function TodoPage({ user, onLogout, token }) {
   const [todos, setTodos] = useState([]);
@@ -92,40 +93,47 @@ function TodoPage({ user, onLogout, token }) {
       <ul className="todo-list">
         {todos.map(todo => (
           <li key={todo.id} className="todo-item">
-            {editingId === todo.id ? (
-              <>
+            <div className="todo-item-content">
+              {editingId === todo.id ? (
                 <input
                   value={editingTitle}
                   onChange={e => setEditingTitle(e.target.value)}
                 />
-                {user.role === 'ADMIN' && (
-                  <label style={{ marginLeft: 8 }}>
+              ) : (
+                <span>{todo.title}</span>
+              )}
+            </div>
+            <div className="todo-item-actions">
+              {editingId === todo.id ? (
+                <>
+                  {user.role === 'ADMIN' && (
+                    <label style={{ marginLeft: 8 }}>
+                      <input
+                        type="checkbox"
+                        checked={editingCompleted}
+                        onChange={e => setEditingCompleted(e.target.checked)}
+                      />
+                      Completed
+                    </label>
+                  )}
+                  <button onClick={() => saveEdit(todo.id)}>Save</button>
+                  <button onClick={() => setEditingId(null)}>Cancel</button>
+                </>
+              ) : (
+                <>
+                  {user.role === 'ADMIN' ? (
                     <input
                       type="checkbox"
-                      checked={editingCompleted}
-                      onChange={e => setEditingCompleted(e.target.checked)}
+                      checked={todo.isCompleted}
+                      disabled
+                      style={{ marginLeft: 8 }}
                     />
-                    Completed
-                  </label>
-                )}
-                <button onClick={() => saveEdit(todo.id)}>Save</button>
-                <button onClick={() => setEditingId(null)}>Cancel</button>
-              </>
-            ) : (
-              <>
-                <span>{todo.title}</span>
-                {user.role === 'ADMIN' ? (
-                  <input
-                    type="checkbox"
-                    checked={todo.isCompleted}
-                    disabled
-                    style={{ marginLeft: 8 }}
-                  />
-                ) : null}
-                <button onClick={() => startEdit(todo)}>Edit</button>
-                <button onClick={() => deleteTodo(todo.id)}>Delete</button>
-              </>
-            )}
+                  ) : null}
+                  <button onClick={() => startEdit(todo)}>Edit</button>
+                  <button onClick={() => deleteTodo(todo.id)}>Delete</button>
+                </>
+              )}
+            </div>
           </li>
         ))}
       </ul>
