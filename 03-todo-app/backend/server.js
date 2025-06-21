@@ -2,6 +2,7 @@
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const port = 8000;
@@ -67,6 +68,9 @@ app.delete('/api/todos/:id', (req, res) => {
   });
 });
 
+// JWT secret - change this to a strong secret in production
+const JWT_SECRET = 'your_jwt_secret_key';
+
 // User login
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
@@ -83,8 +87,55 @@ app.post('/api/login', (req, res) => {
     if (user.password !== password) {
       return res.status(401).json({ error: 'Invalid username or password' });
     }
-    // Set a session or token here for real apps
-    res.json({ message: 'Login successful', user: { id: user.id, username: user.username } });
+    // Generate JWT
+    const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '1h' });
+    res.json({ message: 'Login successful', user: { id: user.id, username: user.username }, token });
+  });
+});
+
+// Middleware to verify JWT
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'No token provided' });
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ error: 'Invalid token' });
+    req.user = user;
+    next();
+  });
+}
+
+// Protect todo routes
+app.get('/api/todos', authenticateToken, (req, res) => {
+  db.query('SELECT * FROM todo', (err, results) => {
+    if (err) return res.status(500).json({ error: err });
+    res.json(results);
+  });
+});
+
+app.post('/api/todos', authenticateToken, (req, res) => {
+  const { title } = req.body;
+  if (!title) return res.status(400).json({ error: 'Title is required' });
+  db.query('INSERT INTO todo (title) VALUES (?)', [title], (err, result) => {
+    if (err) return res.status(500).json({ error: err });
+    res.json({ id: result.insertId, title });
+  });
+});
+
+app.put('/api/todos/:id', authenticateToken, (req, res) => {
+  const { id } = req.params;
+  const { title } = req.body;
+  db.query('UPDATE todo SET title = ? WHERE id = ?', [title, id], (err) => {
+    if (err) return res.status(500).json({ error: err });
+    res.json({ id, title });
+  });
+});
+
+app.delete('/api/todos/:id', authenticateToken, (req, res) => {
+  const { id } = req.params;
+  db.query('DELETE FROM todo WHERE id = ?', [id], (err) => {
+    if (err) return res.status(500).json({ error: err });
+    res.json({ id });
   });
 });
 

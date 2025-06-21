@@ -18,7 +18,8 @@ function Login({ onLogin }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Login failed");
-      onLogin(data.user);
+      // Expect backend to return { user, token }
+      onLogin(data);
     } catch (err) {
       setError(err.message);
     }

@@ -5,14 +5,23 @@ import './App.css';
 
 function App() {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
 
-  const handleLogout = () => setUser(null);
+  const handleLogin = (userData) => {
+    setUser(userData.user);
+    setToken(userData.token);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setToken(null);
+  };
 
   if (!user) {
-    return <Login onLogin={setUser} />;
+    return <Login onLogin={handleLogin} />;
   }
 
-  return <TodoPage user={user} onLogout={handleLogout} />;
+  return <TodoPage user={user} token={token} onLogout={handleLogout} />;
 }
 
 export default App;

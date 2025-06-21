@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import LogoutButton from '../Logout/LogoutButton.jsx';
 import '../Logout/LogoutButton.css';
 
-function TodoPage({ user, onLogout }) {
+function TodoPage({ user, onLogout, token }) {
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState('');
   const [editingId, setEditingId] = useState(null);
@@ -10,12 +10,15 @@ function TodoPage({ user, onLogout }) {
 
   // Fetch todos from backend
   useEffect(() => {
-    if (user) {
-      fetch('http://localhost:8000/api/todos', { credentials: 'include' })
+    if (user && token) {
+      fetch('http://localhost:8000/api/todos', {
+        credentials: 'include',
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
         .then(res => res.json())
         .then(setTodos);
     }
-  }, [user]);
+  }, [user, token]);
 
   // Add todo
   const addTodo = async (e) => {
@@ -23,7 +26,10 @@ function TodoPage({ user, onLogout }) {
     if (!newTodo.trim()) return;
     const res = await fetch('http://localhost:8000/api/todos', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       credentials: 'include',
       body: JSON.stringify({ title: newTodo })
     });
@@ -34,7 +40,11 @@ function TodoPage({ user, onLogout }) {
 
   // Delete todo
   const deleteTodo = async (id) => {
-    await fetch(`http://localhost:8000/api/todos/${id}`, { method: 'DELETE', credentials: 'include' });
+    await fetch(`http://localhost:8000/api/todos/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` },
+      credentials: 'include'
+    });
     setTodos(todos.filter(t => t.id !== id));
   };
 
@@ -48,7 +58,10 @@ function TodoPage({ user, onLogout }) {
   const saveEdit = async (id) => {
     await fetch(`http://localhost:8000/api/todos/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       credentials: 'include',
       body: JSON.stringify({ title: editingTitle })
     });
