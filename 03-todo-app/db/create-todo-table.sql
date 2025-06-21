@@ -1,4 +1,4 @@
-use myTodo;
+USE myTodo;
 
 CREATE TABLE todo (
     id INT AUTO_INCREMENT PRIMARY KEY,
