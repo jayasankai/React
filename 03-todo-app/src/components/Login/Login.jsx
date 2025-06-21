@@ -1,10 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
 function Login({ onLogin }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  // Auto-login if jwt_token exists, otherwise stay on login page
+  useEffect(() => {
+    const token = sessionStorage.getItem('jwt_token');
+    if (token) {
+      onLogin({ token });
+      navigate('/'); // Redirect to todo page
+    } else {
+      navigate('/login'); // Stay/redirect to login page if no token
+    }
+  }, [onLogin, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,8 +31,12 @@ function Login({ onLogin }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Login failed");
-      // Expect backend to return { user, token }
+      // Save token to sessionStorage
+      if (data.token) {
+        sessionStorage.setItem('jwt_token', data.token);
+      }
       onLogin(data);
+      navigate('/'); // Redirect to todo page
     } catch (err) {
       setError(err.message);
     }
