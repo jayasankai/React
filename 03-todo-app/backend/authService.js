@@ -13,4 +13,9 @@ function authenticateToken(req, res, next) {
   });
 }
 
-module.exports = { authenticateToken, JWT_SECRET };
+function generateTokenAndRespond(res, user) {
+  const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '1h' });
+  res.json({ message: 'Login successful', user: { id: user.id, username: user.username }, token });
+}
+
+module.exports = { authenticateToken, JWT_SECRET, generateTokenAndRespond };

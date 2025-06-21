@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-
+const { generateTokenAndRespond } = require('./authService');
 const JWT_SECRET = 'your_jwt_secret_key';
 
 function loginService(db) {
@@ -19,9 +19,8 @@ function loginService(db) {
         if (user.password !== password) {
           return res.status(401).json({ error: 'Invalid username or password' });
         }
-        // Generate JWT
-        const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '1h' });
-        res.json({ message: 'Login successful', user: { id: user.id, username: user.username }, token });
+        // Use authService to generate token and respond
+        generateTokenAndRespond(res, user);
       });
     }
   };
