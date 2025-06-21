@@ -7,6 +7,7 @@ function TodoPage({ user, onLogout, token }) {
   const [newTodo, setNewTodo] = useState('');
   const [editingId, setEditingId] = useState(null);
   const [editingTitle, setEditingTitle] = useState('');
+  const [editingCompleted, setEditingCompleted] = useState(false);
 
   // Fetch todos from backend
   useEffect(() => {
@@ -52,10 +53,15 @@ function TodoPage({ user, onLogout, token }) {
   const startEdit = (todo) => {
     setEditingId(todo.id);
     setEditingTitle(todo.title);
+    setEditingCompleted(todo.isCompleted);
   };
 
   // Save edit
   const saveEdit = async (id) => {
+    const body = { title: editingTitle };
+    if (user.role === 'ADMIN') {
+      body.isCompleted = editingCompleted;
+    }
     await fetch(`http://localhost:8000/api/todos/${id}`, {
       method: 'PUT',
       headers: {
@@ -63,11 +69,12 @@ function TodoPage({ user, onLogout, token }) {
         'Authorization': `Bearer ${token}`
       },
       credentials: 'include',
-      body: JSON.stringify({ title: editingTitle })
+      body: JSON.stringify(body)
     });
-    setTodos(todos.map(t => t.id === id ? { ...t, title: editingTitle } : t));
+    setTodos(todos.map(t => t.id === id ? { ...t, title: editingTitle, isCompleted: editingCompleted } : t));
     setEditingId(null);
     setEditingTitle('');
+    setEditingCompleted(false);
   };
 
   return (
@@ -91,12 +98,30 @@ function TodoPage({ user, onLogout, token }) {
                   value={editingTitle}
                   onChange={e => setEditingTitle(e.target.value)}
                 />
+                {user.role === 'ADMIN' && (
+                  <label style={{ marginLeft: 8 }}>
+                    <input
+                      type="checkbox"
+                      checked={editingCompleted}
+                      onChange={e => setEditingCompleted(e.target.checked)}
+                    />
+                    Completed
+                  </label>
+                )}
                 <button onClick={() => saveEdit(todo.id)}>Save</button>
                 <button onClick={() => setEditingId(null)}>Cancel</button>
               </>
             ) : (
               <>
                 <span>{todo.title}</span>
+                {user.role === 'ADMIN' ? (
+                  <input
+                    type="checkbox"
+                    checked={todo.isCompleted}
+                    disabled
+                    style={{ marginLeft: 8 }}
+                  />
+                ) : null}
                 <button onClick={() => startEdit(todo)}>Edit</button>
                 <button onClick={() => deleteTodo(todo.id)}>Delete</button>
               </>
