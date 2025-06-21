@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import LogoutButton from '../Logout/LogoutButton.jsx';
+import '../Logout/LogoutButton.css';
 
-function TodoPage({ user }) {
+function TodoPage({ user, onLogout }) {
   const [todos, setTodos] = useState([]);
   const [newTodo, setNewTodo] = useState('');
   const [editingId, setEditingId] = useState(null);
@@ -56,7 +58,8 @@ function TodoPage({ user }) {
   };
 
   return (
-    <div className="todo-app">
+    <div className="todo-app" style={{ position: 'relative' }}>
+      <LogoutButton onLogout={onLogout} />
       <h1>Todo List</h1>
       <form onSubmit={addTodo} className="todo-form">
         <input
