@@ -71,7 +71,7 @@ function TodoPage({ user, onLogout, token }) {
       credentials: 'include',
       body: JSON.stringify(body)
     });
-    setTodos(todos.map(t => t.id === id ? { ...t, title: editingTitle, isCompleted: editingCompleted } : t));
+    setTodos(todos.map(t => t.id === id ? { ...t, title: editingTitle, isCompleted: user.role === 'ADMIN' ? editingCompleted : t.isCompleted } : t));
     setEditingId(null);
     setEditingTitle('');
     setEditingCompleted(false);
