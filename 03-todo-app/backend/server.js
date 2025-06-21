@@ -13,7 +13,7 @@ app.use(cors({
 }));
 app.use(express.json());
 
-const createDatabaseConnection = require('./databaseService');
+const createDatabaseConnection = require('./services/databaseService');
 const db = createDatabaseConnection();
 
 db.connect((err) => {
@@ -24,9 +24,9 @@ db.connect((err) => {
   console.log('Connected to MySQL');
 });
 
-const loginService = require('./loginService')(db);
-const todoService = require('./todoService')(db);
-const { authenticateToken, JWT_SECRET } = require('./authService');
+const loginService = require('./services/loginService')(db);
+const todoService = require('./services/todoService')(db);
+const { authenticateToken, JWT_SECRET } = require('./services/authService');
 
 // User login
 app.post('/api/login', loginService.login);
