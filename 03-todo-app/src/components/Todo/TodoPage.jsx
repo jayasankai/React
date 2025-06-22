@@ -9,6 +9,7 @@ function TodoPage({ user, onLogout, token }) {
   const [editingId, setEditingId] = useState(null);
   const [editingTitle, setEditingTitle] = useState('');
   const [editingCompleted, setEditingCompleted] = useState(false);
+  const [addError, setAddError] = useState('');
 
   // Fetch todos from backend
   useEffect(() => {
@@ -25,7 +26,11 @@ function TodoPage({ user, onLogout, token }) {
   // Add todo
   const addTodo = async (e) => {
     e.preventDefault();
-    if (!newTodo.trim()) return;
+    if (!newTodo.trim()) {
+      setAddError('Todo cannot be empty.');
+      return;
+    }
+    setAddError('');
     const res = await fetch('http://localhost:8000/api/todos', {
       method: 'POST',
       headers: {
@@ -79,7 +84,7 @@ function TodoPage({ user, onLogout, token }) {
   };
 
   return (
-    <div className="todo-app" style={{ position: 'relative' }}>
+    <div className="todo-app" id="todo-app" style={{ position: 'relative' }}>
       <LogoutButton onLogout={onLogout} />
       <h1>Todo List</h1>
       <form onSubmit={addTodo} className="todo-form">
@@ -88,12 +93,13 @@ function TodoPage({ user, onLogout, token }) {
           onChange={e => setNewTodo(e.target.value)}
           placeholder="Add a new todo"
         />
-        <button type="submit">Add</button>
+        <button id="add-button" type="submit">Add</button>
       </form>
-      <ul className="todo-list">
+      {addError && <div className="login-error">{addError}</div>}
+      <ul className="todo-list" id="todo-list">
         {todos.map(todo => (
           <li key={todo.id} className="todo-item">
-            <div className="todo-item-content">
+            <div className="todo-item-content" id={`todo-item-content-${todo.id}`}>
               {editingId === todo.id ? (
                 <input
                   value={editingTitle}
@@ -103,12 +109,13 @@ function TodoPage({ user, onLogout, token }) {
                 <span>{todo.title}</span>
               )}
             </div>
-            <div className="todo-item-actions">
+            <div className="todo-item-actions" id={`todo-item-actions-${todo.id}`}>
               {editingId === todo.id ? (
                 <>
                   {user.role === 'ADMIN' && (
                     <label style={{ marginLeft: 8 }}>
                       <input
+                        id={`checkbox-${todo.id}`}
                         type="checkbox"
                         checked={editingCompleted}
                         onChange={e => setEditingCompleted(e.target.checked)}
@@ -116,21 +123,22 @@ function TodoPage({ user, onLogout, token }) {
                       Completed
                     </label>
                   )}
-                  <button onClick={() => saveEdit(todo.id)}>Save</button>
-                  <button onClick={() => setEditingId(null)}>Cancel</button>
+                  <button id={`save-button-${todo.id}`} onClick={() => saveEdit(todo.id)}>Save</button>
+                  <button id={`cancel-button-${todo.id}`} onClick={() => setEditingId(null)}>Cancel</button>
                 </>
               ) : (
                 <>
                   {user.role === 'ADMIN' ? (
                     <input
+                      id={`checkbox-${todo.id}`}
                       type="checkbox"
                       checked={todo.isCompleted}
                       disabled
                       style={{ marginLeft: 8 }}
                     />
                   ) : null}
-                  <button onClick={() => startEdit(todo)}>Edit</button>
-                  <button onClick={() => deleteTodo(todo.id)}>Delete</button>
+                  <button id={`edit-button-${todo.id}`} onClick={() => startEdit(todo)}>Edit</button>
+                  <button id={`delete-button-${todo.id}`} onClick={() => deleteTodo(todo.id)}>Delete</button>
                 </>
               )}
             </div>
