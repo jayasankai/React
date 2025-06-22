@@ -10,6 +10,7 @@ function TodoPage({ user, onLogout, token }) {
   const [editingTitle, setEditingTitle] = useState('');
   const [editingCompleted, setEditingCompleted] = useState(false);
   const [addError, setAddError] = useState('');
+  const [editError, setEditError] = useState('');
 
   // Fetch todos from backend
   useEffect(() => {
@@ -64,6 +65,11 @@ function TodoPage({ user, onLogout, token }) {
 
   // Save edit
   const saveEdit = async (id) => {
+    if (!editingTitle.trim()) {
+      setEditError('Todo cannot be empty.');
+      return;
+    }
+    setEditError('');
     const body = { title: editingTitle };
     if (user.role === 'ADMIN') {
       body.isCompleted = editingCompleted;
@@ -112,6 +118,7 @@ function TodoPage({ user, onLogout, token }) {
             <div className="todo-item-actions" id={`todo-item-actions-${todo.id}`}>
               {editingId === todo.id ? (
                 <>
+                  {editError && <div className="login-error">{editError}</div>}
                   {user.role === 'ADMIN' && (
                     <label style={{ marginLeft: 8 }}>
                       <input
