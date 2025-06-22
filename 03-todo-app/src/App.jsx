@@ -7,10 +7,10 @@ function App() {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
 
-  // Check sessionStorage for token and user on mount
+  // Check localStorage for token and user on mount
   useEffect(() => {
-    const token = sessionStorage.getItem('jwt_token');
-    const userStr = sessionStorage.getItem('jwt_user');
+    const token = localStorage.getItem('jwt_token');
+    const userStr = localStorage.getItem('jwt_user');
     if (token && userStr) {
       try {
         const user = JSON.parse(userStr);
@@ -27,16 +27,16 @@ function App() {
   const handleLogin = (userData) => {
     setUser(userData.user);
     setToken(userData.token);
-    // Save to sessionStorage for persistence
-    if (userData.token) sessionStorage.setItem('jwt_token', userData.token);
-    if (userData.user) sessionStorage.setItem('jwt_user', JSON.stringify(userData.user));
+    // Save to localStorage for persistence
+    if (userData.token) localStorage.setItem('jwt_token', userData.token);
+    if (userData.user) localStorage.setItem('jwt_user', JSON.stringify(userData.user));
   };
 
   const handleLogout = () => {
     setUser(null);
     setToken(null);
-    sessionStorage.removeItem('jwt_token');
-    sessionStorage.removeItem('jwt_user');
+    localStorage.removeItem('jwt_token');
+    localStorage.removeItem('jwt_user');
   };
 
   if (!user) {

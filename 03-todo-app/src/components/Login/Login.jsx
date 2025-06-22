@@ -10,7 +10,7 @@ function Login({ onLogin }) {
 
   // Auto-login if jwt_token exists, otherwise stay on login page
   useEffect(() => {
-    const token = sessionStorage.getItem('jwt_token');
+    const token = localStorage.getItem('jwt_token');
     if (token) {
       onLogin({ token });
       navigate('/'); // Redirect to todo page
@@ -31,9 +31,9 @@ function Login({ onLogin }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Login failed");
-      // Save token to sessionStorage
+      // Save token to localStorage
       if (data.token) {
-        sessionStorage.setItem('jwt_token', data.token);
+        localStorage.setItem('jwt_token', data.token);
       }
       onLogin(data);
       navigate('/'); // Redirect to todo page
