@@ -11,14 +11,12 @@ function App() {
 
   // Check localStorage for token and user on mount
   useEffect(() => {
-    // Check for bypass-auth in URL
+    // Only allow /auth-todos path to bypass login
     const url = new URL(window.location.href);
-    const bypassAuth = url.searchParams.get('user') === 'bypass-auth' || url.hash.includes('bypass-auth');
-    if (bypassAuth) {
-      // Set mock user and token
-      const mockUser = { username: 'bypass-auth', name: 'Bypass User' };
+    if (url.pathname === '/auth-todos') {
+      const mockUser = { username: 'auth-todos', name: 'Auth Todos User' };
       setUser(mockUser);
-      setToken('bypass-token');
+      setToken('auth-todos-token');
       setBypassAuthActive(true);
       setLoading(false);
       return;
@@ -28,7 +26,6 @@ function App() {
     if (token && userStr) {
       try {
         const user = JSON.parse(userStr);
-        // Optionally, check token expiration here
         setUser(user);
         setToken(token);
       } catch (e) {

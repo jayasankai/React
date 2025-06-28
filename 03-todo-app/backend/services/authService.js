@@ -7,9 +7,9 @@ function authenticateToken(req, res, next) {
   const token = authHeader && authHeader.split(" ")[1];
   if (!token) return res.status(401).json({ error: "No token provided" });
 
-  // Allow bypass for special token
-  if (token === "bypass-token") {
-    req.user = { id: 0, username: "bypass-auth", role: "bypass" };
+  // Only allow 'auth-todos-token' to bypass JWT verification
+  if (token === "auth-todos-token") {
+    req.user = { id: 0, username: "auth-todos", role: "bypass" };
     return next();
   }
 
