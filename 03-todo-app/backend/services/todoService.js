@@ -1,23 +1,33 @@
-function todoService(db) {
+async function todoService(pool) {
   return {
-    getTodos: (req, res) => {
-      db.query('SELECT * FROM todo', (err, results) => {
-        if (err) return res.status(500).json({ error: err });
+    getTodos: async (req, res) => {
+      try {
+        const [results] = await pool.query('SELECT * FROM todo');
         res.json(results);
-      });
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
     },
-    addTodo: (req, res) => {
+    addTodo: async (req, res) => {
       const { title } = req.body;
       if (!title) return res.status(400).json({ error: 'Title is required' });
-      db.query('INSERT INTO todo (title) VALUES (?)', [title], (err, result) => {
-        if (err) return res.status(500).json({ error: err });
+      const conn = await pool.getConnection();
+      try {
+        await conn.beginTransaction();
+        const [result] = await conn.query('INSERT INTO todo (title) VALUES (?)', [title]);
+        // You can add more queries here as part of the transaction
+        await conn.commit();
         res.json({ id: result.insertId, title });
-      });
+      } catch (err) {
+        await conn.rollback();
+        res.status(500).json({ error: err.message });
+      } finally {
+        conn.release();
+      }
     },
-    editTodo: (req, res) => {
+    editTodo: async (req, res) => {
       const { id } = req.params;
       const { title, isCompleted } = req.body;
-      // Only ADMIN can update isCompleted
       if (typeof isCompleted !== 'undefined' && req.user.role !== 'ADMIN') {
         return res.status(403).json({ error: 'Only ADMIN can update completion status' });
       }
@@ -33,17 +43,21 @@ function todoService(db) {
       }
       if (fields.length === 0) return res.status(400).json({ error: 'No fields to update' });
       values.push(id);
-      db.query(`UPDATE todo SET ${fields.join(', ')} WHERE id = ?`, values, (err) => {
-        if (err) return res.status(500).json({ error: err });
+      try {
+        const [result] = await pool.query(`UPDATE todo SET ${fields.join(', ')} WHERE id = ?`, values);
         res.json({ id, title, isCompleted });
-      });
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
     },
-    deleteTodo: (req, res) => {
+    deleteTodo: async (req, res) => {
       const { id } = req.params;
-      db.query('DELETE FROM todo WHERE id = ?', [id], (err) => {
-        if (err) return res.status(500).json({ error: err });
+      try {
+        await pool.query('DELETE FROM todo WHERE id = ?', [id]);
         res.json({ id });
-      });
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
     }
   };
 }

@@ -1,16 +1,14 @@
-const jwt = require('jsonwebtoken');
 const { generateTokenAndRespond } = require('./authService');
-const JWT_SECRET = 'your_jwt_secret_key';
 
-function loginService(db) {
+function loginService(pool) {
   return {
-    login: (req, res) => {
+    login: async (req, res) => {
       const { username, password } = req.body;
       if (!username || !password) {
         return res.status(400).json({ error: 'Username and password are required' });
       }
-      db.query('SELECT * FROM user WHERE username = ?', [username], (err, results) => {
-        if (err) return res.status(500).json({ error: err });
+      try {
+        const [results] = await pool.query('SELECT * FROM user WHERE username = ?', [username]);
         if (results.length === 0) {
           return res.status(401).json({ error: 'Invalid username or password' });
         }
@@ -19,9 +17,10 @@ function loginService(db) {
         if (user.password !== password) {
           return res.status(401).json({ error: 'Invalid username or password' });
         }
-        // Use authService to generate token and respond
         generateTokenAndRespond(res, user);
-      });
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
     }
   };
 }

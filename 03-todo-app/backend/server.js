@@ -13,30 +13,24 @@ app.use(cors({
 }));
 app.use(express.json());
 
-const createDatabaseConnection = require('./services/databaseService');
-const db = createDatabaseConnection();
-
-db.connect((err) => {
-  if (err) {
-    console.error('MySQL connection error:', err);
-    process.exit(1);
-  }
-  console.log('Connected to MySQL');
-});
-
-const loginService = require('./services/loginService')(db);
-const todoService = require('./services/todoService')(db);
+const pool = require('./services/databaseService');
 const { authenticateToken, JWT_SECRET } = require('./services/authService');
 
-// User login
-app.post('/api/login', loginService.login);
+// Async IIFE to initialize services and start server
+(async () => {
+  const loginService = await require('./services/loginService')(pool);
+  const todoService = await require('./services/todoService')(pool);
 
-// Protect todo routes
-app.get('/api/todos', authenticateToken, todoService.getTodos);
-app.post('/api/todos', authenticateToken, todoService.addTodo);
-app.put('/api/todos/:id', authenticateToken, todoService.editTodo);
-app.delete('/api/todos/:id', authenticateToken, todoService.deleteTodo);
+  // User login
+  app.post('/api/login', loginService.login);
 
-app.listen(port, () => {
-  console.log(`Backend running on http://localhost:${port}`);
-});
+  // Protect todo routes
+  app.get('/api/todos', authenticateToken, todoService.getTodos);
+  app.post('/api/todos', authenticateToken, todoService.addTodo);
+  app.put('/api/todos/:id', authenticateToken, todoService.editTodo);
+  app.delete('/api/todos/:id', authenticateToken, todoService.deleteTodo);
+
+  app.listen(port, () => {
+    console.log(`Backend running on http://localhost:${port}`);
+  });
+})();
