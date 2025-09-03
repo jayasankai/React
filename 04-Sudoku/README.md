@@ -5,12 +5,12 @@ This Node.js TypeScript app generates Sudoku puzzles in three categories (easy, 
 ## Features
 - Sudoku puzzle generation and solving
 - Difficulty levels: easy, medium, hard
-- Printable A4 output (PDF)
+- Printable A4 output (HTML)
 
 ## Usage
 1. Install dependencies: `npm install`
 2. Run the generator: `npm start`
-3. Find printable PDFs in the `output/` folder
+3. Find printable HTML files in the `output/` folder
 
 ## Project Structure
 - `src/` - TypeScript source code
