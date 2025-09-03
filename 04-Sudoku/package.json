@@ -1,0 +1,16 @@
+{
+  "name": "sudoku-generator",
+  "version": "1.0.0",
+  "description": "Generate Sudoku puzzles of varying difficulty and output printable A4 pages.",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "build": "tsc"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.0"
+  }
+}
